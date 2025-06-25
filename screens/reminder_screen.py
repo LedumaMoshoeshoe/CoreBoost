@@ -2,46 +2,92 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from datetime import datetime
 import sqlite3
+from PIL import Image, ImageTk
+import os
 
 class ReminderScreen(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
         self.master = master
-        self.pack(padx=20, pady=10)
-        self.create_widgets()
-        self.create_table()   # Ensure table exists
-        self.load_reminders()
 
-    def create_widgets(self):
-        tk.Label(self, text="📅 Set a New Reminder", font=("Arial", 16, "bold")).pack(pady=10)
+        # Load and display background image (full screen)
+        bg_path = os.path.join("assets", "background", "menucore.png")  # match your menu bg
+        bg_image = Image.open(bg_path).resize((master.winfo_screenwidth(), master.winfo_screenheight()))
+        self.bg_photo = ImageTk.PhotoImage(bg_image)
+        bg_label = tk.Label(self, image=self.bg_photo)
+        bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-        # Reminder Type
-        tk.Label(self, text="Reminder Type:").pack(anchor='w')
-        self.reminder_type = ttk.Combobox(self, values=["Workout", "Meal", "Hydration", "Stretch"])
-        self.reminder_type.pack(fill='x')
+        # White card container for form and list
+        self.card = tk.Frame(self, bg="white", bd=0, highlightthickness=0, width=600, height=650)
+        self.card.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Date/Time
-        tk.Label(self, text="Reminder Time (YYYY-MM-DD HH:MM):").pack(anchor='w', pady=(10, 0))
-        self.reminder_time = tk.Entry(self)
+        # Header label
+        header = tk.Label(self.card, text="📅 Set a New Reminder", bg="white",
+                          fg="#2c3e50", font=("Arial", 20, "bold"))
+        header.pack(pady=(25, 20))
+
+        # Form container frame
+        form_frame = tk.Frame(self.card, bg="white")
+        form_frame.pack(fill="x", padx=40)
+
+        # Reminder Type Label + Combobox
+        tk.Label(form_frame, text="Reminder Type:", bg="white", fg="#34495e",
+                 font=("Arial", 12)).grid(row=0, column=0, sticky="w", pady=10)
+        self.reminder_type = ttk.Combobox(form_frame, values=["Workout", "Meal", "Hydration", "Stretch"],
+                                          state="readonly", font=("Arial", 12))
+        self.reminder_type.grid(row=0, column=1, sticky="ew", pady=10, padx=(15,0))
+        self.reminder_type.current(0)
+
+        # Reminder Time Label + Entry
+        tk.Label(form_frame, text="Reminder Time (YYYY-MM-DD HH:MM):", bg="white", fg="#34495e",
+                 font=("Arial", 12)).grid(row=1, column=0, sticky="w", pady=10)
+        self.reminder_time = tk.Entry(form_frame, font=("Arial", 12))
+        self.reminder_time.grid(row=1, column=1, sticky="ew", pady=10, padx=(15,0))
         self.reminder_time.insert(0, datetime.now().strftime('%Y-%m-%d %H:%M'))
-        self.reminder_time.pack(fill='x')
 
-        # Add Reminder Button
-        tk.Button(self, text="Add Reminder", command=self.save_reminder).pack(pady=10)
+        form_frame.columnconfigure(1, weight=1)
 
-        # Reminder List
-        tk.Label(self, text="Upcoming Reminders", font=("Arial", 14)).pack(pady=10)
-        self.tree = ttk.Treeview(self, columns=("Type", "Time"), show='headings')
+        # Buttons Frame
+        btn_frame = tk.Frame(self.card, bg="white")
+        btn_frame.pack(fill="x", padx=40, pady=(15, 25))
+
+        btn_style = {"font": ("Arial", 12, "bold"), "bd": 0, "relief": "flat", "width": 15, "height": 1}
+
+        add_btn = tk.Button(btn_frame, text="Add Reminder", bg="#e67e22", fg="white", **btn_style, command=self.save_reminder)
+        add_btn.grid(row=0, column=0, padx=10)
+
+        del_btn = tk.Button(btn_frame, text="Delete Selected", bg="#e74c3c", fg="white", **btn_style, command=self.delete_reminder)
+        del_btn.grid(row=0, column=1, padx=10)
+
+        back_btn = tk.Button(btn_frame, text="← Back to Menu", bg="#3498db", fg="white", **btn_style, command=self.go_back)
+        back_btn.grid(row=0, column=2, padx=10)
+
+        # Upcoming Reminders Label
+        tk.Label(self.card, text="Upcoming Reminders", bg="white", fg="#2c3e50",
+                 font=("Arial", 16, "bold")).pack(pady=(10, 5))
+
+        # Treeview container frame
+        tree_frame = tk.Frame(self.card, bg="white")
+        tree_frame.pack(fill="both", expand=True, padx=40, pady=(0, 30))
+
+        # Treeview with columns
+        self.tree = ttk.Treeview(tree_frame, columns=("Type", "Time"), show="headings", selectmode="browse")
         self.tree.heading("Type", text="Type")
         self.tree.heading("Time", text="Time")
-        self.tree.pack(fill='both', expand=True, pady=10)
+        self.tree.column("Type", anchor="center", width=150)
+        self.tree.column("Time", anchor="center", width=300)
+        self.tree.pack(side="left", fill="both", expand=True)
 
-        # Delete & Back Buttons
-        tk.Button(self, text="Delete Selected", command=self.delete_reminder).pack(pady=5)
-        tk.Button(self, text="← Back to Menu", command=self.go_back).pack(pady=10)
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.tree.configure(yscrollcommand=scrollbar.set)
+
+        # Create DB and load reminders
+        self.create_table()
+        self.load_reminders()
 
     def create_table(self):
-        """Creates the reminders table if it doesn't exist."""
         conn = sqlite3.connect('coreboost.db')
         cursor = conn.cursor()
         cursor.execute('''

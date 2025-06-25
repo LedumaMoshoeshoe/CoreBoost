@@ -16,7 +16,7 @@ def save_users(users):
 def add_user(username, email, password):
     users = load_users()
     if username in users:
-        return False  # Username already exists
+        return False
     users[username] = {"email": email, "password": password}
     save_users(users)
     return True

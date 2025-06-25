@@ -10,5 +10,13 @@
     "Chad": {
         "email": "chadrackndalamba@gmail.com",
         "password": "12345"
+    },
+    "LeratoM": {
+        "email": "leratom@gmail.com",
+        "password": "lerato123"
+    },
+    "Mpumi": {
+        "email": "mahlalelampumi23@gmail.com",
+        "password": "1234"
     }
 }

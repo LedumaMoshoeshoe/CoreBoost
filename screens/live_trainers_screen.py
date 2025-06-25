@@ -1,62 +1,72 @@
 import tkinter as tk
 from tkinter import messagebox
-from PIL import Image, ImageTk  # Requires `pillow` package
+from PIL import Image, ImageTk
 import os
 
 class LiveTrainersScreen(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
-        self.master = master
 
-        tk.Label(self, text="💪 Live Trainers", font=("Arial", 20)).pack(pady=20)
+        # 🌄 Background image
+        bg_path = os.path.join("assets", "background", "coreboostlogo.png")
+        bg_image = Image.open(bg_path).resize((master.winfo_screenwidth(), master.winfo_screenheight()))
+        self.bg_photo = ImageTk.PhotoImage(bg_image)
+        tk.Label(self, image=self.bg_photo).place(x=0, y=0, relwidth=1, relheight=1)
 
-        # Example trainer data
+        # 🧾 Content wrapper
+        content = tk.Frame(self, bg="#ffffff", bd=2, relief="ridge")
+        content.place(relx=0.5, rely=0.5, anchor="center", width=700, height=550)
+
+        # 📢 Header
+        tk.Label(content, text="💪 Live Trainers", font=("Helvetica", 22, "bold"), bg="#ffffff", fg="#333").pack(pady=20)
+
+        # 🧍 Trainer Data
         self.trainers = [
             {"name": "Zinhle M.", "specialty": "Yoga", "status": "Online", "image": "zinhle.jpg"},
             {"name": "Tumi K.", "specialty": "Strength", "status": "Offline", "image": "tumi.jpg"},
             {"name": "Chris D.", "specialty": "Cardio", "status": "Online", "image": "chris.jpg"},
         ]
 
-        # Container frame (for potential scroll support later)
-        self.container = tk.Frame(self)
-        self.container.pack(padx=10, pady=10)
-
-        self.image_refs = []  # Keep references to prevent image garbage collection
+        self.image_refs = []
+        self.container = tk.Frame(content, bg="#ffffff")
+        self.container.pack(fill="both", expand=True, padx=20)
 
         for trainer in self.trainers:
             self.display_trainer(trainer)
 
-        tk.Button(self, text="Back to Menu", command=self.go_back).pack(pady=20)
+        tk.Button(content, text="← Back to Menu", font=("Helvetica", 10, "bold"), bg="#2196F3", fg="white",
+                  relief="flat", command=self.go_back).pack(pady=15)
 
     def display_trainer(self, trainer):
-        frame = tk.Frame(self.container, bd=2, relief="groove", padx=10, pady=10)
+        frame = tk.Frame(self.container, bg="#f7f7f7", bd=1, relief="solid", padx=10, pady=10)
         frame.pack(fill="x", pady=8)
 
-        # Load image
+        # 📷 Trainer Image
         image_path = os.path.join("assets", "trainers", trainer["image"])
         try:
-            img = Image.open(image_path).resize((80, 80))
+            img = Image.open(image_path).resize((70, 70))
             photo = ImageTk.PhotoImage(img)
-            self.image_refs.append(photo)  # Prevent garbage collection
-
-            img_label = tk.Label(frame, image=photo)
+            self.image_refs.append(photo)
+            img_label = tk.Label(frame, image=photo, bg="#f7f7f7")
             img_label.pack(side="left", padx=10)
-        except Exception as e:
-            tk.Label(frame, text="🧍", font=("Arial", 30)).pack(side="left", padx=10)
+        except Exception:
+            tk.Label(frame, text="🧍", font=("Helvetica", 36), bg="#f7f7f7").pack(side="left", padx=10)
 
-        # Textual info
-        info = tk.Frame(frame)
+        # 📄 Info Section
+        info = tk.Frame(frame, bg="#f7f7f7")
         info.pack(side="left", fill="x", expand=True)
 
         name = f"{trainer['name']} ({trainer['specialty']})"
         status = trainer["status"]
+        status_color = "#4CAF50" if status == "Online" else "#9E9E9E"
 
-        tk.Label(info, text=name, font=("Arial", 14, "bold")).pack(anchor="w")
-        tk.Label(info, text=f"Status: {status}", fg="green" if status == "Online" else "gray").pack(anchor="w")
+        tk.Label(info, text=name, font=("Helvetica", 14, "bold"), bg="#f7f7f7", fg="#333").pack(anchor="w")
+        tk.Label(info, text=f"● {status}", fg=status_color, font=("Helvetica", 10, "bold"), bg="#f7f7f7").pack(anchor="w")
 
-        # Join button (only if online)
+        # 🔗 Join Button
         if status == "Online":
-            tk.Button(frame, text="Join Session", command=lambda: self.join_session(trainer["name"])).pack(side="right", padx=10)
+            tk.Button(frame, text="Join Session", font=("Helvetica", 10), bg="#4CAF50", fg="white",
+                      relief="flat", command=lambda: self.join_session(trainer["name"])).pack(side="right", padx=10)
 
     def join_session(self, trainer_name):
         messagebox.showinfo("Joining", f"You are joining {trainer_name}'s live session...")
