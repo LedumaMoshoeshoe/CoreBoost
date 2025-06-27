@@ -1,4 +1,4 @@
-import tkinter as tk
+import tkinter as tk 
 from tkinter import messagebox
 from screens.base_screen import BaseScreen
 
@@ -32,16 +32,15 @@ class LoginScreen(BaseScreen):
             bg="#4facfe", fg="white", activebackground="#00f2fe",
             relief="flat", command=self.check_login
         )
-        login_btn.pack(pady=20, ipadx=10, ipady=5)
+        login_btn.pack(pady=(20, 10), ipadx=10, ipady=5)
 
-        # Register Link (underlined style)
-        register_link = tk.Label(
-            card, text="👤 Don't have an account? Register",
-            font=("Arial", 9, "underline"), fg="blue",
-            bg="white", cursor="hand2"
+        # Register Button (Styled like Login button)
+        register_btn = tk.Button(
+            card, text="👤 Register", font=("Arial", 11, "bold"),
+            bg="#43e97b", fg="white", activebackground="#38f9d7",
+            relief="flat", command=self.go_to_register
         )
-        register_link.pack()
-        register_link.bind("<Button-1>", lambda e: self.go_to_register())
+        register_btn.pack(pady=(0, 15), ipadx=10, ipady=5)
 
     def check_login(self):
         from utils import user_store

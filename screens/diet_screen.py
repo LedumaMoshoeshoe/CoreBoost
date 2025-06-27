@@ -35,12 +35,21 @@ class DietScreen(BaseScreen):
         # ➕ Add/Edit Meals
         tk.Label(content, text="➕ Add or Edit Your Meal", font=("Helvetica", 13, "bold"), bg="#ffffff", fg="#444").pack(pady=(10, 4))
 
-        self.meal_entry = tk.Entry(content, width=40, font=("Helvetica", 10))
-        self.meal_entry.pack(pady=3, ipady=4)
+        # 🧾 Form Frame for Meal Name & Calories (Aligned with grid)
+        form_frame = tk.Frame(content, bg="#ffffff")
+        form_frame.pack(pady=(0, 10))
 
-        self.cal_entry = tk.Entry(content, width=40, font=("Helvetica", 10))
-        self.cal_entry.pack(pady=3, ipady=4)
+        # Meal Name
+        tk.Label(form_frame, text="Meal Name:", font=("Helvetica", 10, "bold"), bg="#ffffff").grid(row=0, column=0, sticky="w", padx=10, pady=5)
+        self.meal_entry = tk.Entry(form_frame, font=("Helvetica", 10), width=30)
+        self.meal_entry.grid(row=0, column=1, padx=10, pady=5, ipady=3)
 
+        # Calories
+        tk.Label(form_frame, text="Calories (kcal):", font=("Helvetica", 10, "bold"), bg="#ffffff").grid(row=1, column=0, sticky="w", padx=10, pady=5)
+        self.cal_entry = tk.Entry(form_frame, font=("Helvetica", 10), width=30)
+        self.cal_entry.grid(row=1, column=1, padx=10, pady=5, ipady=3)
+
+        # 💾 Save Button
         tk.Button(content, text="💾 Save Meal", command=self.add_or_update_meal,
                   bg="#4CAF50", fg="white", relief="flat", padx=10).pack(pady=6)
 
